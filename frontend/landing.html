@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LegalRAG — AI-Powered Property Due Diligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN SYSTEM - ENHANCED WITH GLASSMORPHISM
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:        #0a0c12;
+  --bg2:       #0f1219;
+  --bg3:       #151924;
+  --bg4:       #1b2030;
+  --border:    #1f2740;
+  --border2:   #28334f;
+  --gold:      #c9a84c;
+  --gold2:     #e8c96d;
+  --gold3:     #f5dfa0;
+  --gold-dim:  rgba(201,168,76,0.10);
+  --gold-glow: rgba(201,168,76,0.05);
+  --text:      #e8ecf6;
+  --text2:     #8d98b4;
+  --text3:     #4e5a78;
+  --high:      #e05555;
+  --med:       #e09055;
+  --low:       #4fb87a;
+  --font-head: 'DM Serif Display', serif;
+  --font-body: 'Crimson Pro', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius:    12px;
+  --shadow-gold: 0 0 80px rgba(201,168,76,0.07);
+  --glass-bg: rgba(21, 25, 36, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #0a0c12 0%, #12141c 50%, #0a0c12 100%);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ANIMATED BACKGROUND ORBS ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: float 20s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(ellipse at center, rgba(79,184,122,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: float 25s ease-in-out infinite reverse;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* ── NOISE TEXTURE ── */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.015) 79px, rgba(255,255,255,0.015) 80px),
+    repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.015) 79px, rgba(255,255,255,0.015) 80px);
+  opacity: 0.5;
+}
+
+/* ── SCROLL PROGRESS ── */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold2), var(--gold3));
+  z-index: 999;
+  width: 0%;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 20px rgba(201,168,76,0.6);
+}
+
+/* ════════════════════════════════════════════════════
+   NAV - GLASSMORPHISM
+════════════════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: rgba(10,12,18,0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+nav.scrolled {
+  background: rgba(10,12,18,0.85);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.nav-logo:hover {
+  transform: translateY(-2px);
+}
+
+.nav-wordmark {
+  font-family: var(--font-head);
+  font-size: 1.55rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 30px rgba(201,168,76,0.3);
+}
+
+.nav-tagline {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text2);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-cta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-nav {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 10px 22px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-nav:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(201,168,76,0.2);
+}
+
+.btn-nav-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  border-color: var(--gold);
+  color: #08090d;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+}
+
+.btn-nav-primary:hover {
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold3) 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+}
+
+/* ════════════════════════════════════════════════════
+   HERO - ENHANCED
+════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 140px 24px 80px;
+  overflow: hidden;
+}
+
+/* Enhanced radial glow */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1200px;
+  height: 800px;
+  background: radial-gradient(ellipse at center,
+    rgba(201,168,76,0.12) 0%,
+    rgba(201,168,76,0.06) 30%,
+    transparent 70%);
+  pointer-events: none;
+  filter: blur(60px);
+}
+
+/* Enhanced animated grid */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 100%);
+  animation: gridDrift 25s linear infinite;
+}
+
+@keyframes gridDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 80px 80px; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 8px 20px;
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 100px;
+  background: rgba(201,168,76,0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.2s forwards;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+  box-shadow: 0 0 10px var(--gold);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(3rem, 7vw, 5.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.35s forwards;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.hero-title em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 50%, var(--gold3) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold2), transparent);
+  border-radius: 2px;
+  box-shadow: 0 0 20px var(--gold);
+}
+
+.hero-sub {
+  font-size: 1.25rem;
+  color: var(--text2);
+  max-width: 640px;
+  margin: 0 auto 48px;
+  line-height: 1.8;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.5s forwards;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.65s forwards;
+}
+
+.btn-hero-primary {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  color: #08090d;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(201,168,76,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.btn-hero-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-hero-primary:hover::before {
+  left: 100%;
+}
+
+.btn-hero-primary:hover {
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold3) 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(201,168,76,0.6);
+}
+
+.btn-hero-secondary {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  padding: 16px 32px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text2);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-hero-secondary:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.3);
+}
+
+/* Hero stats strip - GLASSMORPHISM */
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  margin-top: 80px;
+  padding: 32px 48px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.8s forwards;
+  flex-wrap: wrap;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.hero-stat {
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.hero-stat:hover {
+  transform: translateY(-4px);
+}
+
+.hero-stat-num {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  display: block;
+  text-shadow: 0 0 30px rgba(201,168,76,0.5);
+}
+
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 8px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════════════════
+   TICKER / MARQUEE - GLASSMORPHISM
+════════════════════════════════════════════════════ */
+.ticker-wrap {
+  position: relative;
+  z-index: 10;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  overflow: hidden;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.ticker-track {
+  display: flex;
+  gap: 0;
+  animation: ticker 30s linear infinite;
+  white-space: nowrap;
+}
+
+.ticker-item {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ticker-item::after {
+  content: '◆';
+  color: var(--gold);
+  opacity: 0.5;
+  font-size: 0.55rem;
+  filter: drop-shadow(0 0 5px var(--gold));
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ════════════════════════════════════════════════════
+   FEATURES - GLASSMORPHISM CARDS
+════════════════════════════════════════════════════ */
+.section {
+  position: relative;
+  z-index: 10;
+  padding: 120px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(201,168,76,0.1);
+  border-radius: 100px;
+  border: 1px solid rgba(201,168,76,0.2);
+}
+
+.section-heading {
+  font-family: var(--font-head);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.section-body {
+  font-size: 1.08rem;
+  color: var(--text2);
+  max-width: 580px;
+  line-height: 1.8;
+  margin-bottom: 60px;
+}
+
+/* Feature grid - ENHANCED GLASS CARDS */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 40px 36px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.feature-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: radial-gradient(circle at top right, rgba(201,168,76,0.1), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.feature-card:hover {
+  background: rgba(21, 25, 36, 0.6);
+  border-color: rgba(201,168,76,0.4);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 50px rgba(201,168,76,0.25);
+}
+
+.feature-card:hover::before,
+.feature-card:hover::after {
+  opacity: 1;
+}
+
+.feature-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.1) 100%);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1) rotateY(10deg);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+}
+
+.feature-title {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.feature-desc {
+  font-size: 0.95rem;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.feature-tag {
+  display: inline-block;
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 4px 12px;
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 6px;
+  background: rgba(201,168,76,0.08);
+  backdrop-filter: blur(5px);
+}
+
+/* ════════════════════════════════════════════════════
+   HOW IT WORKS — TIMELINE - GLASSMORPHISM
+════════════════════════════════════════════════════ */
+.how-section {
+  position: relative;
+  z-index: 10;
+  padding: 120px 48px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.3);
+}
+
+.how-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 80px;
+  position: relative;
+}
+
+.steps-row::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--glass-border) 20%,
+    var(--gold) 50%,
+    var(--glass-border) 80%,
+    transparent);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.step-item {
+  text-align: center;
+  padding: 0 20px;
+  position: relative;
+}
+
+.step-num {
+  width: 64px;
+  height: 64px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 2px solid var(--glass-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.step-item:hover .step-num {
+  background: rgba(201,168,76,0.2);
+  border-color: var(--gold);
+  transform: scale(1.15) rotateY(10deg);
+  box-shadow: 0 8px 40px rgba(201,168,76,0.5);
+}
+
+.step-title {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.step-desc {
+  font-size: 0.9rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* ════════════════════════════════════════════════════
+   LRI EXPLAINER - GLASSMORPHISM VISUAL
+════════════════════════════════════════════════════ */
+.lri-section-wrap {
+  position: relative;
+  z-index: 10;
+  padding: 120px 48px;
+}
+
+.lri-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+}
+
+.lri-visual {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 44px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.lri-visual::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15), transparent 70%);
+  filter: blur(40px);
+}
+
+.lri-gauge-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+
+.lri-gauge-num {
+  font-family: var(--font-mono);
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--med) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  text-shadow: 0 0 40px rgba(224,144,85,0.5);
+}
+
+.lri-gauge-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text3);
+  margin-bottom: 32px;
+}
+
+.lri-track-demo {
+  height: 10px;
+  background: rgba(10, 12, 18, 0.6);
+  backdrop-filter: blur(5px);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.lri-fill-demo {
+  height: 100%;
+  width: 38%;
+  background: linear-gradient(90deg, var(--low), var(--med), var(--gold));
+  border-radius: 5px;
+  position: relative;
+  animation: lriPulse 3s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(224,144,85,0.6);
+}
+
+@keyframes lriPulse {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.8; filter: brightness(1.2); }
+}
+
+.lri-bands {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  margin-bottom: 36px;
+}
+
+.lri-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lri-cat-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  transition: all 0.3s ease;
+}
+
+.lri-cat-row:hover {
+  background: rgba(201,168,76,0.05);
+  transform: translateX(4px);
+}
+
+.lri-cat-name {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lri-cat-track {
+  height: 6px;
+  background: rgba(10, 12, 18, 0.6);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.lri-cat-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+  transition: width 0.6s ease;
+}
+
+.lri-cat-pct {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text2);
+  text-align: right;
+  font-weight: 700;
+}
+
+/* ════════════════════════════════════════════════════
+   TRUST STRIP - GLASSMORPHISM TESTIMONIALS
+════════════════════════════════════════════════════ */
+.trust-section {
+  position: relative;
+  z-index: 10;
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 120px 48px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.3);
+}
+
+.trust-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 60px;
+}
+
+.trust-card {
+  background: rgba(21, 25, 36, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.trust-card:hover {
+  background: rgba(21, 25, 36, 0.7);
+  border-color: rgba(201,168,76,0.4);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 50px rgba(201,168,76,0.25);
+}
+
+.trust-quote-mark {
+  font-family: var(--font-head);
+  font-size: 5rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.2;
+  line-height: 1;
+  position: absolute;
+  top: 20px;
+  left: 28px;
+}
+
+.trust-quote {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.75;
+  margin-bottom: 24px;
+  padding-top: 16px;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+.trust-author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trust-avatar {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.3) 0%, rgba(201,168,76,0.15) 100%);
+  border: 2px solid rgba(201,168,76,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+}
+
+.trust-author-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.trust-author-role {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════════════
+   PRICING - GLASSMORPHISM CARDS
+════════════════════════════════════════════════════ */
+.pricing-section {
+  position: relative;
+  z-index: 10;
+  padding: 120px 48px;
+}
+
+.pricing-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 80px;
+  align-items: start;
+}
+
+.price-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 44px 40px;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.price-card:hover {
+  border-color: rgba(201,168,76,0.4);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.4);
+}
+
+.price-card.featured {
+  border-color: rgba(201,168,76,0.6);
+  background: rgba(21, 25, 36, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 12px 60px rgba(201,168,76,0.4);
+}
+
+.price-card.featured:hover {
+  transform: scale(1.05) translateY(-8px);
+  box-shadow: 0 20px 80px rgba(201,168,76,0.6);
+}
+
+.price-featured-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #08090d;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  padding: 6px 18px;
+  border-radius: 100px;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.5);
+}
+
+.price-tier {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+
+.price-amount {
+  font-family: var(--font-mono);
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--text) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.price-amount sup {
+  font-size: 1.4rem;
+  vertical-align: top;
+  margin-top: 10px;
+}
+
+.price-period {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text3);
+  margin-bottom: 28px;
+}
+
+.price-desc {
+  font-size: 0.95rem;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.price-features {
+  list-style: none;
+  margin-bottom: 36px;
+}
+
+.price-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text2);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.price-features li::before {
+  content: '✓';
+  color: var(--low);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  filter: drop-shadow(0 0 5px var(--low));
+}
+
+.price-features li.na {
+  opacity: 0.4;
+}
+
+.price-features li.na::before {
+  content: '×';
+  color: var(--text3);
+  filter: none;
+}
+
+.btn-price {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.03);
+  color: var(--text2);
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-price:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(201,168,76,0.3);
+}
+
+.btn-price.primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  border-color: var(--gold);
+  color: #08090d;
+  box-shadow: 0 4px 25px rgba(201,168,76,0.4);
+}
+
+.btn-price.primary:hover {
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold3) 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 35px rgba(201,168,76,0.6);
+}
+
+/* ════════════════════════════════════════════════════
+   CTA BANNER - GLASSMORPHISM
+════════════════════════════════════════════════════ */
+.cta-section {
+  position: relative;
+  z-index: 10;
+  padding: 120px 48px;
+  text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid var(--glass-border);
+  overflow: hidden;
+  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(201,168,76,0.12), transparent 70%);
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+.cta-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-family: var(--font-head);
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.cta-sub {
+  font-size: 1.12rem;
+  color: var(--text2);
+  line-height: 1.8;
+  margin-bottom: 44px;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ════════════════════════════════════════════════════
+   FOOTER - GLASSMORPHISM
+════════════════════════════════════════════════════ */
+footer {
+  position: relative;
+  z-index: 10;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  padding: 80px 48px 48px;
+}
+
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+.footer-brand .wordmark {
+  font-family: var(--font-head);
+  font-size: 1.7rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.footer-brand p {
+  font-size: 0.95rem;
+  color: var(--text3);
+  line-height: 1.7;
+  max-width: 320px;
+}
+
+.footer-col-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 20px;
+}
+
+.footer-col a {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text2);
+  text-decoration: none;
+  padding: 6px 0;
+  transition: all 0.3s ease;
+  letter-spacing: 0.03em;
+}
+
+.footer-col a:hover {
+  color: var(--gold);
+  transform: translateX(4px);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 32px;
+  border-top: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--text3);
+}
+
+.footer-badges {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border: 1px solid var(--glass-border);
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.footer-badge:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+}
+
+/* ════════════════════════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-delay-1 { transition-delay: 0.15s; }
+.reveal-delay-2 { transition-delay: 0.3s; }
+.reveal-delay-3 { transition-delay: 0.45s; }
+.reveal-delay-4 { transition-delay: 0.6s; }
+
+/* ════════════════════════════════════════════════════
+   SCROLLBAR - ENHANCED
+════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--border2), var(--gold));
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(201,168,76,0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--gold), var(--gold2));
+}
+
+/* ════════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing-grid  { grid-template-columns: 1fr; max-width: 480px; margin-inline: auto; }
+  .price-card.featured { transform: none; }
+  .lri-inner     { grid-template-columns: 1fr; gap: 60px; }
+  .footer-grid   { grid-template-columns: 1fr 1fr; }
+  .trust-grid    { grid-template-columns: 1fr; }
+  .steps-row     { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 24px; height: 64px; }
+  .nav-links { display: none; }
+  .section, .pricing-section, .cta-section { padding: 80px 24px; }
+  .how-section { padding: 80px 24px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr; }
+  .steps-row { grid-template-columns: 1fr; gap: 48px; }
+  .steps-row::before { display: none; }
+  .hero-stats { gap: 28px; flex-direction: column; padding: 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  footer { padding: 64px 24px 32px; }
+  .lri-section-wrap { padding: 80px 24px; }
+  .hero { padding: 120px 24px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NOISE OVERLAY ── -->
+<div class="noise-overlay"></div>
+
+<!-- ── SCROLL PROGRESS ── -->
+<div id="progress-bar"></div>
+
+<!-- ════════ NAV ════════ -->
+<nav>
+  <a class="nav-logo" href="/landing">
+    <span class="nav-wordmark">LegalRAG</span>
+    <span class="nav-tagline">Property Intelligence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#lri">LRI Score</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a class="btn-nav" href="/app">Sign In</a>
+    <a class="btn-nav btn-nav-primary" href="/app">Launch Platform →</a>
+  </div>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Now powered by Context + LRI Engine</div>
+
+    <h1 class="hero-title">
+      Due Diligence,<br/>
+      <em>Reimagined</em> for<br/>
+      the Modern Practitioner
+    </h1>
+
+    <p class="hero-sub">
+      LegalRAG analyses property sale deeds using a Retrieval-Augmented AI engine and
+      our proprietary Legal Risk Index — surfacing title risks, encumbrances, and compliance
+      gaps in minutes, not weeks.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn-hero-primary" href="/app">
+        Open Dashboard
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="btn-hero-secondary" href="#how">See How It Works</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="counter-1">0</span>
+        <span class="hero-stat-label">Risk Categories</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="counter-2">0</span>
+        <span class="hero-stat-label">Threat Patterns</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="counter-3">0<span style="font-size:1.6rem">%</span></span>
+        <span class="hero-stat-label">Accuracy on Benchmarks</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num" id="counter-4">0<span style="font-size:1.4rem">min</span></span>
+        <span class="hero-stat-label">Avg. Analysis Time</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TICKER ════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">RAG-powered risk extraction</span>
+    <span class="ticker-item">Gemini AI analysis engine</span>
+    <span class="ticker-item">Legal Risk Index (LRI)</span>
+    <span class="ticker-item">Title defect detection</span>
+    <span class="ticker-item">Encumbrance scanning</span>
+    <span class="ticker-item">Multi-language PDF reports</span>
+    <span class="ticker-item">Pending litigation alerts</span>
+    <span class="ticker-item">Stamp duty validation</span>
+    <span class="ticker-item">Property boundary analysis</span>
+    <span class="ticker-item">RAG-powered risk extraction</span>
+    <span class="ticker-item">Gemini AI analysis engine</span>
+    <span class="ticker-item">Legal Risk Index (LRI)</span>
+    <span class="ticker-item">Title defect detection</span>
+    <span class="ticker-item">Encumbrance scanning</span>
+    <span class="ticker-item">Multi-language PDF reports</span>
+    <span class="ticker-item">Pending litigation alerts</span>
+    <span class="ticker-item">Stamp duty validation</span>
+    <span class="ticker-item">Property boundary analysis</span>
+  </div>
+</div>
+
+<!-- ════════ FEATURES ════════ -->
+<section class="section" id="features">
+  <div class="section-label reveal">Core Capabilities</div>
+  <h2 class="section-heading reveal reveal-delay-1">Every risk surface, covered.</h2>
+  <p class="section-body reveal reveal-delay-2">
+    Our platform combines a curated legal knowledge base with Gemini's reasoning capabilities
+    to deliver structured, actionable intelligence across every dimension of property risk.
+  </p>
+
+  <div class="features-grid reveal reveal-delay-3">
+    <div class="feature-card">
+      <div class="feature-icon">⚖️</div>
+      <div class="feature-title">Title Chain Analysis</div>
+      <div class="feature-desc">Traces ownership history, detects breaks in title chain, identifies adverse claims and undisclosed heirs that could cloud title.</div>
+      <span class="feature-tag">RAG + Gemini</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Encumbrance Detection</div>
+      <div class="feature-desc">Scans for mortgages, liens, charges, and easements buried in legal language. Flags undisclosed financial claims automatically.</div>
+      <span class="feature-tag">NLP Pattern Match</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Stamp Duty Validation</div>
+      <div class="feature-desc">Cross-references declared consideration value against stamp duty paid. Detects undervaluation patterns across all Indian jurisdictions.</div>
+      <span class="feature-tag">Algorithmic Check</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏛️</div>
+      <div class="feature-title">Litigation Risk Scan</div>
+      <div class="feature-desc">Identifies references to pending court cases, disputes, injunctions, and attachment orders embedded within document text.</div>
+      <span class="feature-tag">Threat Inventory</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📐</div>
+      <div class="feature-title">Boundary Compliance</div>
+      <div class="feature-desc">Reviews property measurement descriptions, schedule references, and survey number discrepancies against legal deed specifications.</div>
+      <span class="feature-tag">Clause Extraction</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Multi-Language Reports</div>
+      <div class="feature-desc">Generates PDF due diligence reports in 7 languages including Hindi, Tamil, Telugu, Bengali — readable by all stakeholders.</div>
+      <span class="feature-tag">7 Languages</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ HOW IT WORKS ════════ -->
+<div class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-label reveal">Process</div>
+    <h2 class="section-heading reveal reveal-delay-1">From document to decision in four steps.</h2>
+
+    <div class="steps-row">
+      <div class="step-item reveal reveal-delay-1">
+        <div class="step-num">01</div>
+        <div class="step-title">Upload Document</div>
+        <div class="step-desc">Drop in any sale deed, title document, or property agreement as PDF or DOCX. No formatting required.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <div class="step-title">RAG Extraction</div>
+        <div class="step-desc">Gemini queries our curated legal knowledge base to extract clauses, parties, and risk indicators with full context.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-3">
+        <div class="step-num">03</div>
+        <div class="step-title">LRI Computation</div>
+        <div class="step-desc">Our Legal Risk Index algorithm scores 9 risk categories using keyword density, semantic similarity, and Gemini severity labels.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-4">
+        <div class="step-num">04</div>
+        <div class="step-title">Report Generation</div>
+        <div class="step-desc">Download a structured PDF report with threat inventory, risk scores, and recommended actions — ready for clients.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ LRI EXPLAINER ════════ -->
+<section class="lri-section-wrap" id="lri">
+  <div class="lri-inner">
+    <div>
+      <div class="section-label reveal">Proprietary Scoring</div>
+      <h2 class="section-heading reveal reveal-delay-1">The Legal Risk Index</h2>
+      <p class="section-body reveal reveal-delay-2">
+        The LRI is a composite 0–100 risk score derived from four sub-signals
+        per risk category: keyword density, RAG semantic similarity, threat density,
+        and Gemini's severity assessment. Weighted and normalised across 9 legal
+        risk dimensions, it produces a single defensible number your clients understand.
+      </p>
+      <div class="reveal reveal-delay-3" style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:0.72rem">
+          <div style="width:12px;height:12px;background:var(--low);border-radius:3px;flex-shrink:0;box-shadow:0 0 10px var(--low)"></div>
+          <span style="color:var(--text2)"><strong style="color:var(--low)">0–19</strong> — Low risk. Proceed with standard checks.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:0.72rem">
+          <div style="width:12px;height:12px;background:var(--med);border-radius:3px;flex-shrink:0;box-shadow:0 0 10px var(--med)"></div>
+          <span style="color:var(--text2)"><strong style="color:var(--med)">20–44</strong> — Medium risk. Additional verification recommended.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:0.72rem">
+          <div style="width:12px;height:12px;background:var(--high);border-radius:3px;flex-shrink:0;box-shadow:0 0 10px var(--high)"></div>
+          <span style="color:var(--text2)"><strong style="color:var(--high)">45–69</strong> — High risk. Legal counsel required before proceeding.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:0.72rem">
+          <div style="width:12px;height:12px;background:#c03030;border-radius:3px;flex-shrink:0;box-shadow:0 0 10px #c03030"></div>
+          <span style="color:var(--text2)"><strong style="color:#c03030">70–100</strong> — Critical. Do not proceed without full legal review.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lri-visual reveal reveal-delay-2">
+      <div class="lri-gauge-label">Sample LRI Score</div>
+      <div class="lri-gauge-num">38.4</div>
+      <div class="lri-gauge-sub">Medium Risk — further verification advised</div>
+
+      <div class="lri-track-demo">
+        <div class="lri-fill-demo"></div>
+      </div>
+      <div class="lri-bands">
+        <span>0</span><span>20</span><span>45</span><span>70</span><span>100</span>
+      </div>
+
+      <div class="lri-cat-list">
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Title Defects</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:62%;background:var(--med)"></div></div>
+          <span class="lri-cat-pct" style="color:var(--med)">62%</span>
+        </div>
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Encumbrances</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:28%"></div></div>
+          <span class="lri-cat-pct">28%</span>
+        </div>
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Stamp Duty</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:14%;background:var(--low)"></div></div>
+          <span class="lri-cat-pct" style="color:var(--low)">14%</span>
+        </div>
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Pending Litigation</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:45%;background:var(--med)"></div></div>
+          <span class="lri-cat-pct" style="color:var(--med)">45%</span>
+        </div>
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Boundary Issues</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:18%;background:var(--low)"></div></div>
+          <span class="lri-cat-pct" style="color:var(--low)">18%</span>
+        </div>
+        <div class="lri-cat-row">
+          <span class="lri-cat-name">Missing Permissions</span>
+          <div class="lri-cat-track"><div class="lri-cat-fill" style="width:76%;background:var(--high)"></div></div>
+          <span class="lri-cat-pct" style="color:var(--high)">76%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TESTIMONIALS ════════ -->
+<div class="trust-section">
+  <div class="trust-inner">
+    <div class="section-label reveal">Trusted By Practitioners</div>
+    <h2 class="section-heading reveal reveal-delay-1">What legal professionals say</h2>
+
+    <div class="trust-grid">
+      <div class="trust-card reveal reveal-delay-1">
+        <div class="trust-quote-mark">"</div>
+        <div class="trust-quote">LegalRAG flagged an undisclosed mortgage that our manual review missed entirely. The threat inventory saved our client from a ₹2.4 crore dispute.</div>
+        <div class="trust-author">
+          <div class="trust-avatar">RK</div>
+          <div>
+            <div class="trust-author-name">Rajiv Krishnamurthy</div>
+            <div class="trust-author-role">Partner, Property Law · Chennai</div>
+          </div>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-delay-2">
+        <div class="trust-quote-mark">"</div>
+        <div class="trust-quote">We run 30–40 due diligence files per month. LegalRAG cut our first-pass review time from three days to under two hours. The LRI score is something clients actually understand.</div>
+        <div class="trust-author">
+          <div class="trust-avatar">SP</div>
+          <div>
+            <div class="trust-author-name">Sunita Prasad</div>
+            <div class="trust-author-role">Senior Advocate, High Court · Mumbai</div>
+          </div>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-delay-3">
+        <div class="trust-quote-mark">"</div>
+        <div class="trust-quote">The multi-language reports are a game changer for our regional developer clients. Delivering a Tamil-language due diligence summary builds immediate trust.</div>
+        <div class="trust-author">
+          <div class="trust-avatar">AM</div>
+          <div>
+            <div class="trust-author-name">Arjun Menon</div>
+            <div class="trust-author-role">Real Estate Counsel · Kochi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ PRICING ════════ -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label reveal">Pricing</div>
+    <h2 class="section-heading reveal reveal-delay-1">Straightforward plans for every practice.</h2>
+    <p class="section-body reveal reveal-delay-2">No per-page charges. No surprise overages. Run the full LRI pipeline on any document at a predictable monthly cost.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card reveal reveal-delay-1">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount"><sup>₹</sup>4,999</div>
+        <div class="price-period">per month, billed annually</div>
+        <div class="price-desc">For solo practitioners and small property law offices doing occasional due diligence reviews.</div>
+        <ul class="price-features">
+          <li>20 analyses per month</li>
+          <li>Full LRI scoring engine</li>
+          <li>PDF report generation</li>
+          <li>English reports only</li>
+          <li class="na">API access</li>
+          <li class="na">Team seats</li>
+          <li class="na">Priority support</li>
+        </ul>
+        <a class="btn-price" href="/app">Get Started →</a>
+      </div>
+
+      <div class="price-card featured reveal reveal-delay-2">
+        <div class="price-featured-badge">Most Popular</div>
+        <div class="price-tier">Professional</div>
+        <div class="price-amount"><sup>₹</sup>14,999</div>
+        <div class="price-period">per month, billed annually</div>
+        <div class="price-desc">For active law firms running high-volume property transactions and developer portfolios.</div>
+        <ul class="price-features">
+          <li>Unlimited analyses</li>
+          <li>Full LRI scoring engine</li>
+          <li>PDF report generation</li>
+          <li>All 7 languages</li>
+          <li>API access (500 calls/mo)</li>
+          <li>5 team seats</li>
+          <li class="na">Dedicated support</li>
+        </ul>
+        <a class="btn-price primary" href="/app">Start Free Trial →</a>
+      </div>
+
+      <div class="price-card reveal reveal-delay-3">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-amount" style="font-size:2.2rem;padding-top:8px">Custom</div>
+        <div class="price-period">contact for volume pricing</div>
+        <div class="price-desc">For banks, NBFCs, and large developer groups needing bulk processing and custom integrations.</div>
+        <ul class="price-features">
+          <li>Unlimited everything</li>
+          <li>Custom LRI weighting</li>
+          <li>White-label reports</li>
+          <li>All 7 languages</li>
+          <li>Unlimited API access</li>
+          <li>Unlimited team seats</li>
+          <li>Dedicated support + SLA</li>
+        </ul>
+        <a class="btn-price" href="mailto:enterprise@legalrag.in">Contact Sales →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ CTA ════════ -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-title reveal">Ready to analyse your first document?</h2>
+    <p class="cta-sub reveal reveal-delay-1">
+      Open the platform, create a case, upload a deed — your LRI report is ready
+      in under five minutes. No credit card required to start.
+    </p>
+    <div class="cta-actions reveal reveal-delay-2">
+      <a class="btn-hero-primary" href="/app">
+        Open Platform
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="btn-hero-secondary" href="mailto:hello@legalrag.in">Talk to Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="wordmark">LegalRAG</div>
+        <p>AI-powered property due diligence for Indian legal practitioners. Analyse sale deeds, surface risks, deliver LRI-graded reports.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <a href="/app">Dashboard</a>
+        <a href="#features">Features</a>
+        <a href="#lri">LRI Score</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Resources</div>
+        <a href="#">Documentation</a>
+        <a href="#">API Reference</a>
+        <a href="#">Sample Reports</a>
+        <a href="#">LRI Methodology</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Company</div>
+        <a href="#">About</a>
+        <a href="mailto:hello@legalrag.in">Contact</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 LegalRAG Technologies Pvt. Ltd. · CIN U72900TN2024PTC000001 · Made in India</div>
+      <div class="footer-badges">
+        <span class="footer-badge">SOC 2 Compliant</span>
+        <span class="footer-badge">DPDP Ready</span>
+        <span class="footer-badge">ISO 27001</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Scroll progress bar ──────────────────────────────
+const progressBar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const h   = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  progressBar.style.width = pct + '%';
+});
+
+// ── Scroll reveal ────────────────────────────────────
+const revealEls = document.querySelectorAll('.reveal');
+const observer  = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach(el => observer.observe(el));
+
+// ── Animated counters ────────────────────────────────
+function animateCounter(el, target, duration = 1800, suffix = '') {
+  let start = null;
+  const step = (timestamp) => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    el.childNodes[0].textContent = Math.floor(eased * target);
+    if (progress < 1) requestAnimationFrame(step);
+    else el.childNodes[0].textContent = target;
+  };
+  requestAnimationFrame(step);
+}
+
+// Trigger counters when hero stats come into view
+const statsEl = document.querySelector('.hero-stats');
+const statsObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    animateCounter(document.getElementById('counter-1'), 9);
+    animateCounter(document.getElementById('counter-2'), 240);
+    animateCounter(document.getElementById('counter-3'), 94);
+    animateCounter(document.getElementById('counter-4'), 4);
+    statsObs.disconnect();
+  }
+}, { threshold: 0.5 });
+statsObs.observe(statsEl);
+
+// ── Nav background on scroll ─────────────────────────
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 40) {
+    navEl.classList.add('scrolled');
+  } else {
+    navEl.classList.remove('scrolled');
+  }
+});
+
+// ── Smooth scroll for anchor links ──────────────────
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>
