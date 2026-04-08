@@ -1,0 +1,2801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LegalRAG — Property Due Diligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ═══════════════════════════════════════════
+   PREMIUM DESIGN SYSTEM — Vibrant Gradient UI
+═══════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════
+   PREMIUM GOLD GLASSMORPHISM DESIGN SYSTEM
+═══════════════════════════════════════════ */
+        :root {
+            /* Gold-accented premium dark palette */
+            --bg-base: #0a0c12;
+            --bg-elevated: #0f1219;
+            --bg-card: rgba(21, 25, 36, 0.4);
+            --bg-card-hover: rgba(21, 25, 36, 0.65);
+            --bg-glass: rgba(21, 25, 36, 0.5);
+            --bg-stage: #0d0d0d;
+
+            /* Borders & lines */
+            --border: #1f2740;
+            --border-light: #28334f;
+            --border-glow: rgba(201, 168, 76, 0.2);
+
+            /* Gold & Glow effects */
+            --gold: #c9a84c;
+            --gold2: #e8c96d;
+            --gold3: #f5dfa0;
+            --gold-dim: rgba(201, 168, 76, 0.10);
+            --gold-glow: rgba(201, 168, 76, 0.05);
+            --accent-primary: #c9a84c;
+            --accent-glow: rgba(201, 168, 76, 0.3);
+
+            /* Risk colors - refined */
+            --high: #e05555;
+            --high-bg: rgba(224, 85, 85, 0.12);
+            --high-glow: rgba(224, 85, 85, 0.35);
+            --med: #e09055;
+            --med-bg: rgba(224, 144, 85, 0.12);
+            --med-glow: rgba(224, 144, 85, 0.35);
+            --low: #4fb87a;
+            --low-bg: rgba(79, 184, 122, 0.12);
+            --low-glow: rgba(79, 184, 122, 0.35);
+            --crit: #ff3333;
+            --crit-bg: rgba(255, 51, 51, 0.15);
+
+            /* Text colors - refined hierarchy */
+            --text-primary: #e8ecf6;
+            --text-secondary: #8d98b4;
+            --text-tertiary: #4e5a78;
+            --text-muted: rgba(255, 255, 255, 0.25);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+            --font-serif: 'Crimson Pro', serif;
+            --font-head: 'DM Serif Display', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Shadows & effects - enhanced with gold */
+            --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 16px 60px rgba(0, 0, 0, 0.6);
+            --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.7);
+            --shadow-gold: 0 0 80px rgba(201, 168, 76, 0.08);
+            --glow-white: 0 0 40px rgba(201, 168, 76, 0.25);
+            --glow-strong: 0 0 60px rgba(201, 168, 76, 0.4);
+
+            /* Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-pill: 999px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0c12 0%, #12141c 50%, #0a0c12 100%);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* ── ANIMATED BACKGROUND ORBS ── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 20s ease-in-out infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(ellipse at center, rgba(79,184,122,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 25s ease-in-out infinite reverse;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(201, 168, 76, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(201, 168, 76, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.1) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+
+        /* Grain texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        /* ── LAYOUT ── */
+        #app {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .sidebar-logo {
+            padding: 32px 24px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.1) 0%, rgba(201, 168, 76, 0.1) 100%);
+        }
+
+        .sidebar-logo .wordmark {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .sidebar-logo .tagline {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 24px 0;
+            overflow-y: auto;
+        }
+
+        .nav-section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            padding: 12px 24px 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            margin: 4px 12px;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            user-select: none;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            border-radius: 0 2px 2px 0;
+            transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item:hover {
+            background: rgba(201, 168, 76, 0.1);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.2) 0%, rgba(201, 168, 76, 0.2) 100%);
+            color: var(--text-primary);
+            font-weight: 600;
+            box-shadow: var(--glow-gold);
+        }
+
+        .nav-item.active::before {
+            height: 60%;
+        }
+
+        .nav-item .icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .nav-item.active .icon {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            height: 72px;
+            flex-shrink: 0;
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .topbar-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--gold);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(201, 168, 76, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--gold2) 0%, #6b4296 100%);
+            box-shadow: 0 6px 20px rgba(201, 168, 76, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            border-color: var(--high);
+            color: var(--high);
+        }
+
+        .btn-danger:hover {
+            background: var(--high-bg);
+            box-shadow: 0 4px 16px var(--high-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* ── CONTENT AREA ── */
+        .content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        /* ── VIEW SWITCHER ── */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── STAT CARDS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold) 0%, var(--gold2) 50%, #00f2fe 100%);
+            opacity: 0.6;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+
+        /* ── SECTION HEADERS ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .section-meta {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+
+        /* ── CASES TABLE ── */
+        .cases-table-wrap {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .cases-search-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-input:focus {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 16px 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            text-align: left;
+        }
+
+        td {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: rgba(201, 168, 76, 0.1);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .case-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .case-addr {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* ── BADGES ── */
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 6px;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .badge-high {
+            color: var(--high);
+            background: var(--high-bg);
+            border: 1px solid var(--high);
+            box-shadow: 0 2px 8px var(--high-glow);
+        }
+
+        .badge-medium {
+            color: var(--med);
+            background: var(--med-bg);
+            border: 1px solid var(--med);
+            box-shadow: 0 2px 8px var(--med-glow);
+        }
+
+        .badge-low {
+            color: var(--low);
+            background: var(--low-bg);
+            border: 1px solid var(--low);
+            box-shadow: 0 2px 8px var(--low-glow);
+        }
+
+        .badge-crit {
+            color: var(--crit);
+            background: var(--crit-bg);
+            border: 1px solid var(--crit);
+        }
+
+        .badge-status-pending {
+            color: var(--text-tertiary);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .badge-status-analyzing {
+            color: var(--gold);
+            background: rgba(201, 168, 76, 0.15);
+            border: 1px solid var(--gold);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .badge-status-completed {
+            color: var(--low);
+            background: var(--low-bg);
+            border: 1px solid var(--low);
+        }
+
+        .badge-status-failed {
+            color: var(--high);
+            background: var(--high-bg);
+            border: 1px solid var(--high);
+        }
+
+        /* ── SCORE BAR ── */
+        .score-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            max-width: 100px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .score-num {
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            min-width: 32px;
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            width: 520px;
+            max-width: 95vw;
+            box-shadow: var(--shadow-xl);
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .modal-sub {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
+        .form-field {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        /* ── CASE DETAIL VIEW ── */
+        .detail-header {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            margin-bottom: 32px;
+            padding: 28px;
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 72px;
+            z-index: 50;
+        }
+
+        .detail-header-info {
+            flex: 1;
+        }
+
+        .detail-case-name {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .detail-address {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .detail-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .detail-meta-item {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            font-weight: 600;
+        }
+
+        .detail-meta-item span {
+            color: var(--text-secondary);
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        /* ── UPLOAD ZONE ── */
+        .upload-zone {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 48px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            margin-bottom: 24px;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: var(--gold);
+            background: rgba(201, 168, 76, 0.1);
+            box-shadow: var(--glow-gold);
+        }
+
+        .upload-zone-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .upload-zone-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-zone-hint {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* ── ANALYSIS PROGRESS ── */
+        .analysis-progress {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .progress-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            border-right-color: var(--gold2);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .progress-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .progress-sub {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+        }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 32px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 14px 24px;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--gold);
+            font-weight: 700;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* ── RESULT CARDS ── */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .result-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .result-card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        /* ── LRI GAUGE ── */
+        .lri-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .lri-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .lri-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .lri-score-display {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .lri-score-num {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .lri-score-denom {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--text-tertiary);
+        }
+
+        /* LRI track bar */
+        .lri-track {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .lri-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .lri-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 40px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+        }
+
+        .lri-band-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        /* Category bars */
+        .cat-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cat-bar-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 70px 90px;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .cat-bar-row:hover {
+            background: rgba(201, 168, 76, 0.1);
+            transform: translateX(4px);
+        }
+
+        .cat-bar-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cat-bar-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cat-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .cat-bar-pct {
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        .cat-bar-threats {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-align: right;
+        }
+
+        /* ── KEY FINDINGS ── */
+        .findings-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .findings-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .finding-group {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--gold);
+        }
+
+        .finding-group-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .finding-cat-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .finding-bullets {
+            padding-left: 24px;
+        }
+
+        .finding-bullet {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            padding: 8px 0;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .finding-bullet::before {
+            content: '▸';
+            position: absolute;
+            left: -24px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ── RISK ANALYSIS ACCORDION ── */
+        .risk-accordion {
+            margin-bottom: 32px;
+        }
+
+        .risk-item {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .risk-item:hover {
+            border-color: var(--border-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .risk-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .risk-item-header:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .risk-item-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .risk-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .risk-score-chip {
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .risk-chevron {
+            transition: transform 0.3s;
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        .risk-item.open .risk-chevron {
+            transform: rotate(180deg);
+        }
+
+        .risk-item-body {
+            display: none;
+            padding: 0 24px 24px;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .risk-item.open .risk-item-body {
+            display: block;
+            padding-top: 20px;
+        }
+
+        .risk-rag-refs {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .risk-rag-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+        }
+
+        .risk-rag-count {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        /* ── THREAT TABLE ── */
+        .threat-section {
+            margin-bottom: 32px;
+        }
+
+        .threat-section-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .threat-cat {
+            margin-bottom: 32px;
+        }
+
+        .threat-cat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .threat-cat-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .threat-count-chip {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 12px;
+        }
+
+        .threat-table-wrap {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .threat-table th {
+            font-size: 0.7rem;
+            padding: 12px 16px;
+        }
+
+        .threat-table td {
+            font-size: 0.875rem;
+            padding: 16px;
+            font-family: var(--font-sans);
+        }
+
+        .threat-table tbody tr {
+            cursor: default;
+        }
+
+        .threat-table tbody tr:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .threat-id {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .threat-match {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .threat-location {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+        }
+
+        .threat-context {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── SUMMARY TEXT ── */
+        .summary-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .summary-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .summary-text p {
+            margin-bottom: 16px;
+        }
+
+        .summary-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ── LANGUAGE SELECT ── */
+        .lang-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-hint {
+            font-size: 0.95rem;
+            color: var(--text-tertiary);
+        }
+
+        /* ── TOAST ── */
+        .toast-container {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 999;
+        }
+
+        .toast {
+            background: var(--bg-elevated);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-xl);
+            animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 360px;
+            min-width: 280px;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--low);
+            box-shadow: var(--shadow-xl), 0 0 20px var(--low-glow);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--high);
+            box-shadow: var(--shadow-xl), 0 0 20px var(--high-glow);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--gold);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(201, 168, 76, 0.3);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 32px 0;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(201, 168, 76, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(201, 168, 76, 0.7);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .cat-bar-row {
+                grid-template-columns: 140px 1fr 60px;
+            }
+
+            .cat-bar-threats {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 200;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-header {
+                flex-direction: column;
+            }
+
+            .cat-bar-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .cat-bar-label {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* ── SPLIT VIEW (Document-to-Finding Mapping) ── */
+        .split-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .split-pane {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .split-pane-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .document-excerpt {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .document-excerpt mark {
+            background: rgba(201, 168, 76, 0.3);
+            color: var(--text-primary);
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 1024px) {
+            .split-view {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- ════════ SIDEBAR ════════ -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="wordmark">LegalRAG</div>
+                <div class="tagline">Property Due Diligence</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Navigation</div>
+                <div class="nav-item active" data-view="dashboard">
+                    <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="7" height="7" rx="1" />
+                        <rect x="11" y="2" width="7" height="7" rx="1" />
+                        <rect x="2" y="11" width="7" height="7" rx="1" />
+                        <rect x="11" y="11" width="7" height="7" rx="1" />
+                    </svg>
+                    Dashboard
+                </div>
+                <div class="nav-item" data-view="cases">
+                    <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 4h14M3 10h14M3 16h10" />
+                    </svg>
+                    All Cases
+                </div>
+
+                <div class="nav-section-label" style="margin-top:16px">Actions</div>
+                <div class="nav-item" id="nav-new-case">
+                    <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="10" cy="10" r="7" />
+                        <path d="M10 6v8M6 10h8" />
+                    </svg>
+                    New Case
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                API → localhost:5000<br />
+                <span id="sb-case-count" style="color:var(--gold);font-weight:700">—</span> cases loaded
+            </div>
+        </aside>
+
+        <!-- ════════ MAIN ════════ -->
+        <div class="main">
+            <div class="topbar">
+                <div class="topbar-title" id="topbar-title">Overview</div>
+                <div class="topbar-actions">
+                    <button class="btn" onclick="refreshAll()">
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 10A7 7 0 1 1 10 3a7 7 0 0 1 5 2" />
+                            <path d="M15 2v5h-5" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <button class="btn btn-primary" onclick="openNewCase()">+ New Case</button>
+                </div>
+            </div>
+
+            <div class="content">
+
+                <!-- ══ DASHBOARD VIEW ══ -->
+                <div class="view active" id="view-dashboard">
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Cases</div>
+                            <div class="stat-value" id="s-total">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Completed</div>
+                            <div class="stat-value" id="s-completed">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">High Risk</div>
+                            <div class="stat-value" id="s-high" style="color:var(--high)">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Medium Risk</div>
+                            <div class="stat-value" id="s-med" style="color:var(--med)">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Pending</div>
+                            <div class="stat-value" id="s-pending" style="color:var(--gold)">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Avg Score</div>
+                            <div class="stat-value" id="s-avg">—</div>
+                            <div class="stat-sub">out of 10</div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <div class="section-title">Recent Cases</div>
+                        <div class="section-meta" id="dash-meta">Loading…</div>
+                    </div>
+
+                    <div class="cases-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Case</th>
+                                    <th>Risk Level</th>
+                                    <th>Score</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-cases-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ══ ALL CASES VIEW ══ -->
+                <div class="view" id="view-cases">
+                    <div class="cases-table-wrap">
+                        <div class="cases-search-bar">
+                            <input class="search-input" type="text" id="search-input"
+                                placeholder="Search cases, addresses…" oninput="filterCases()" />
+                            <select class="filter-select" id="filter-status" onchange="filterCases()">
+                                <option value="">All Status</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Failed">Failed</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="openNewCase()">+ New Case</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Case</th>
+                                    <th>Risk Level</th>
+                                    <th>Score</th>
+                                    <th>Status</th>
+                                    <th>Docs</th>
+                                    <th>Created</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-cases-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ══ CASE DETAIL VIEW ══ -->
+                <div class="view" id="view-detail">
+                    <div style="margin-bottom:16px">
+                        <button class="btn" onclick="showView('cases')">← Back to Cases</button>
+                    </div>
+
+                    <div class="detail-header">
+                        <div class="detail-header-info">
+                            <div class="detail-case-name" id="det-name">—</div>
+                            <div class="detail-address" id="det-addr">—</div>
+                            <div class="detail-meta">
+                                <div class="detail-meta-item">ID: <span id="det-id">—</span></div>
+                                <div class="detail-meta-item">Created: <span id="det-created">—</span></div>
+                                <div class="detail-meta-item">Status: <span id="det-status-span">—</span></div>
+                            </div>
+                        </div>
+                        <div class="detail-actions" id="det-actions"></div>
+                    </div>
+
+                    <!-- Upload zone (shown when pending/no docs) -->
+                    <div id="upload-section" style="display:none">
+                        <div class="upload-zone" id="upload-zone"
+                            onclick="document.getElementById('file-input').click()"
+                            ondragover="event.preventDefault();this.classList.add('drag-over')"
+                            ondragleave="this.classList.remove('drag-over')" ondrop="handleFileDrop(event)">
+                            <div class="upload-zone-icon">📄</div>
+                            <div class="upload-zone-text">Drop PDF or DOCX here, or click to browse</div>
+                            <div class="upload-zone-hint">Supported: .pdf, .docx, .doc (Max 10MB per file)</div>
+                        </div>
+                        <input type="file" id="file-input" accept=".pdf,.docx,.doc" multiple
+                            onchange="handleFileSelect(event)" />
+                        <div style="display:flex;gap:16px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+                            <label class="form-label" style="margin:0">Language:</label>
+                            <select class="lang-select" id="lang-select">
+                                <option value="English">English</option>
+                                <option value="हिन्दी (Hindi)">हिन्दी (Hindi)</option>
+                                <option value="தமிழ் (Tamil)">தமிழ் (Tamil)</option>
+                                <option value="বাংলা (Bengali)">বাংলা (Bengali)</option>
+                                <option value="తెలుగు (Telugu)">తెలుగు (Telugu)</option>
+                                <option value="मराठी (Marathi)">मराठी (Marathi)</option>
+                                <option value="ગુજરાતી (Gujarati)">ગુજરાતી (Gujarati)</option>
+                            </select>
+                            <button class="btn btn-primary" id="analyze-btn" onclick="startAnalysis()" disabled>Run
+                                Analysis</button>
+                        </div>
+                    </div>
+
+                    <!-- Analyzing spinner -->
+                    <div id="analyzing-section" style="display:none">
+                        <div class="analysis-progress">
+                            <div class="progress-spinner"></div>
+                            <div class="progress-label">Running Analysis…</div>
+                            <div class="progress-sub">AI-powered RAG + LRI computation — this may take a few minutes
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results tabs (shown after completion) -->
+                    <div id="results-section" style="display:none">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="overview">Overview</div>
+                            <div class="tab" data-tab="lri">LRI Score</div>
+                            <div class="tab" data-tab="risks">Risk Analysis</div>
+                            <div class="tab" data-tab="threats">Threats</div>
+                            <div class="tab" data-tab="summary">Summary</div>
+                        </div>
+
+                        <!-- Overview tab -->
+                        <div class="tab-panel active" id="tab-overview">
+                            <div class="result-grid">
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        <span class="result-card-title">Overall Risk Score</span>
+                                    </div>
+                                    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
+                                        <span id="ov-score"
+                                            style="font-family:var(--font-display);font-size:3.5rem;font-weight:800;line-height:1">—</span>
+                                        <span
+                                            style="font-family:var(--font-display);font-size:1.5rem;color:var(--text-tertiary)">/10</span>
+                                        <span id="ov-badge" style="margin-left:12px"></span>
+                                    </div>
+                                    <div id="ov-description"
+                                        style="font-size:0.875rem;color:var(--text-tertiary);line-height:1.6"></div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        <span class="result-card-title">Document Info</span>
+                                    </div>
+                                    <div id="ov-doc"
+                                        style="font-size:0.95rem;color:var(--text-primary);margin-bottom:12px;font-weight:600">
+                                    </div>
+                                    <div id="ov-words"
+                                        style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:8px"></div>
+                                    <div id="ov-threats" style="font-size:0.875rem;color:var(--text-secondary)"></div>
+                                </div>
+                            </div>
+
+                            <!-- Key findings -->
+                            <div class="findings-section" id="findings-section">
+                                <div class="findings-title">Key Findings at a Glance</div>
+                                <div id="findings-body"></div>
+                            </div>
+
+                            <!-- Category score bars -->
+                            <div class="lri-section" id="overview-cat-section">
+                                <div class="lri-header">
+                                    <span class="lri-title">Risk by Category</span>
+                                </div>
+                                <div class="cat-bars" id="ov-cat-bars"></div>
+                            </div>
+                        </div>
+
+                        <!-- LRI tab -->
+                        <div class="tab-panel" id="tab-lri">
+                            <div class="lri-section">
+                                <div class="lri-header">
+                                    <span class="lri-title">Legal Risk Index (LRI)</span>
+                                    <div class="lri-score-display">
+                                        <span class="lri-score-num" id="lri-score-num">—</span>
+                                        <span class="lri-score-denom">/100</span>
+                                    </div>
+                                </div>
+
+                                <div class="lri-track">
+                                    <div class="lri-fill" id="lri-fill" style="width:0%"></div>
+                                </div>
+                                <div class="lri-band-labels">
+                                    <span>0 — Low</span><span>20 — Medium</span><span>45 — High</span><span>70 —
+                                        Critical</span><span>100</span>
+                                </div>
+
+                                <div id="lri-band-desc"
+                                    style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:32px;padding:16px 20px;background:rgba(0,0,0,0.3);border-radius:var(--radius-md);border:1px solid var(--border)">
+                                </div>
+
+                                <div class="cat-bars" id="lri-cat-bars"></div>
+
+                                <div class="divider"></div>
+
+                                <!-- Sub-score table -->
+                                <div
+                                    style="font-size:0.75rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:16px">
+                                    Sub-score Detail · P_i = 0.30×KD + 0.25×RS + 0.15×TD + 0.30×GS
+                                </div>
+                                <div class="threat-table-wrap">
+                                    <table class="threat-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>KD</th>
+                                                <th>RS</th>
+                                                <th>TD</th>
+                                                <th>GS</th>
+                                                <th>GS Label</th>
+                                                <th>P_i</th>
+                                                <th>Contribution</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lri-subscore-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risks tab -->
+                        <div class="tab-panel" id="tab-risks">
+                            <div class="risk-accordion" id="risk-accordion"></div>
+                        </div>
+
+                        <!-- Threats tab -->
+                        <div class="tab-panel" id="tab-threats">
+                            <div class="threat-section" id="threat-section">
+                                <div class="threat-section-title">Threat Inventory — Document References</div>
+                                <div id="threat-body"></div>
+                            </div>
+                        </div>
+
+                        <!-- Summary tab -->
+                        <div class="tab-panel" id="tab-summary">
+                            <div class="summary-section">
+                                <div class="summary-title">Executive Summary</div>
+                                <div class="summary-text" id="summary-text"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Failed state -->
+                    <div id="failed-section" style="display:none">
+                        <div class="empty">
+                            <div class="empty-icon">⚠️</div>
+                            <div class="empty-text">Analysis Failed</div>
+                            <div class="empty-hint" id="error-msg"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /content -->
+        </div><!-- /main -->
+    </div><!-- /app -->
+
+    <!-- ══ NEW CASE MODAL ══ -->
+    <div class="modal-overlay" id="new-case-modal">
+        <div class="modal">
+            <div class="modal-title">New Case</div>
+            <div class="modal-sub">Create a new property due diligence case</div>
+
+            <div class="form-field">
+                <label class="form-label" for="nc-name">Case Name</label>
+                <input class="form-input" id="nc-name" type="text" placeholder="e.g. 14 Gandhi Nagar Purchase" />
+            </div>
+            <div class="form-field">
+                <label class="form-label" for="nc-addr">Property Address</label>
+                <input class="form-input" id="nc-addr" type="text" placeholder="Full property address" />
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('new-case-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createCase()">Create Case</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ TOAST CONTAINER ══ -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════
+        //  CONFIG
+        // ═══════════════════════════════════════════════════════
+        const API = 'http://localhost:5000/api';
+
+        // ═══════════════════════════════════════════════════════
+        //  STATE
+        // ═══════════════════════════════════════════════════════
+        let allCases = [];
+        let currentCaseId = null;
+        let pollInterval = null;
+        let pendingFile = null;
+
+        // ═══════════════════════════════════════════════════════
+        //  HELPERS
+        // ═══════════════════════════════════════════════════════
+        async function apiFetch(path, opts = {}) {
+            try {
+                const r = await fetch(API + path, opts);
+                if (!r.ok) {
+                    const err = await r.json().catch(() => ({ error: r.statusText }));
+                    throw new Error(err.error || r.statusText);
+                }
+                return await r.json();
+            } catch (e) {
+                console.error('API error:', path, e);
+                throw e;
+            }
+        }
+
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function fmtScore(s) {
+            if (s == null || s === 0) return '—';
+            return Number(s).toFixed(1);
+        }
+
+        function riskColor(level) {
+            if (!level) return 'var(--text-tertiary)';
+            const l = level.toLowerCase();
+            if (l === 'high' || l === 'critical') return 'var(--high)';
+            if (l === 'medium') return 'var(--med)';
+            return 'var(--low)';
+        }
+
+        function riskBadge(level) {
+            if (!level) return '';
+            const l = level.toLowerCase();
+            const cls = l === 'high' || l === 'critical' ? 'badge-high' :
+                l === 'medium' ? 'badge-medium' : 'badge-low';
+            return `<span class="badge ${cls}">${level}</span>`;
+        }
+
+        function statusBadge(status) {
+            if (!status) return '';
+            const s = status.toLowerCase().replace(' ', '-');
+            let cls = 'badge-status-pending';
+            if (s === 'analyzing') cls = 'badge-status-analyzing';
+            else if (s === 'completed') cls = 'badge-status-completed';
+            else if (s === 'failed') cls = 'badge-status-failed';
+            return `<span class="badge ${cls}">${status}</span>`;
+        }
+
+        function scoreColor(score10) {
+            if (score10 >= 7) return 'var(--high)';
+            if (score10 >= 4) return 'var(--med)';
+            return 'var(--low)';
+        }
+
+        function lriColor(lri) {
+            if (lri >= 70) return 'var(--crit)';
+            if (lri >= 45) return 'var(--high)';
+            if (lri >= 20) return 'var(--med)';
+            return 'var(--low)';
+        }
+
+        function pct(v) { return `${(v * 100).toFixed(1)}%`; }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  NAVIGATION
+        // ═══════════════════════════════════════════════════════
+        function showView(name) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + name).classList.add('active');
+            document.querySelectorAll('.nav-item[data-view]').forEach(n => {
+                n.classList.toggle('active', n.dataset.view === name);
+            });
+            const titles = { dashboard: 'Overview', cases: 'All Cases', detail: 'Case Detail' };
+            document.getElementById('topbar-title').textContent = titles[name] || name;
+        }
+
+        document.querySelectorAll('.nav-item[data-view]').forEach(n => {
+            n.addEventListener('click', () => {
+                if (n.dataset.view === 'cases') loadCases();
+                showView(n.dataset.view);
+            });
+        });
+        document.getElementById('nav-new-case').addEventListener('click', openNewCase);
+
+        // Tab switching in detail view
+        document.querySelectorAll('.tab').forEach(t => {
+            t.addEventListener('click', () => {
+                const panel = t.dataset.tab;
+                document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+                t.classList.add('active');
+                document.getElementById('tab-' + panel).classList.add('active');
+            });
+        });
+
+        // ═══════════════════════════════════════════════════════
+        //  MODAL
+        // ═══════════════════════════════════════════════════════
+        function openNewCase() {
+            document.getElementById('nc-name').value = '';
+            document.getElementById('nc-addr').value = '';
+            document.getElementById('new-case-modal').classList.add('open');
+            setTimeout(() => document.getElementById('nc-name').focus(), 50);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        document.getElementById('new-case-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal('new-case-modal');
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+            if (e.key === 'Enter' && document.getElementById('new-case-modal').classList.contains('open')) createCase();
+        });
+
+        // ═══════════════════════════════════════════════════════
+        //  DASHBOARD
+        // ═══════════════════════════════════════════════════════
+        async function loadDashboard() {
+            try {
+                const stats = await apiFetch('/statistics');
+                document.getElementById('s-total').textContent = stats.totalCases ?? '—';
+                document.getElementById('s-completed').textContent = stats.completedCases ?? '—';
+                document.getElementById('s-high').textContent = stats.highRiskCases ?? '—';
+                document.getElementById('s-med').textContent = stats.mediumRiskCases ?? '—';
+                document.getElementById('s-pending').textContent = stats.pendingCases ?? '—';
+                document.getElementById('s-avg').textContent = stats.avgRiskScore ?? '—';
+            } catch (e) { /* ignore */ }
+
+            try {
+                const cases = await apiFetch('/cases');
+                allCases = cases;
+                document.getElementById('sb-case-count').textContent = cases.length;
+                document.getElementById('dash-meta').textContent = `${cases.length} total case(s)`;
+
+                const tbody = document.getElementById('dash-cases-tbody');
+                const recent = cases.slice(0, 8);
+                if (!recent.length) {
+                    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No cases yet</div><div class="empty-hint">Create your first case to get started</div></div></td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = recent.map(c => caseRow(c, false)).join('');
+            } catch (e) {
+                toast('Failed to load dashboard', 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  CASES LIST
+        // ═══════════════════════════════════════════════════════
+        async function loadCases() {
+            try {
+                const cases = await apiFetch('/cases');
+                allCases = cases;
+                renderCasesTable(cases);
+            } catch (e) {
+                toast('Failed to load cases', 'error');
+            }
+        }
+
+        function filterCases() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+            const filtered = allCases.filter(c => {
+                const matchQ = !q || c.caseName.toLowerCase().includes(q) || (c.propertyAddress || '').toLowerCase().includes(q);
+                const matchS = !status || c.status === status;
+                return matchQ && matchS;
+            });
+            renderCasesTable(filtered);
+        }
+
+        function renderCasesTable(cases) {
+            const tbody = document.getElementById('all-cases-tbody');
+            if (!cases.length) {
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No cases found</div></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = cases.map(c => caseRow(c, true)).join('');
+        }
+
+        function caseRow(c, showActions) {
+            const score = c.overallRiskScore ? fmtScore(c.overallRiskScore) : '—';
+            const fillW = c.overallRiskScore ? `${Math.min(c.overallRiskScore / 10 * 100, 100)}%` : '0%';
+            const fillC = c.overallRiskScore ? scoreColor(c.overallRiskScore) : 'var(--text-tertiary)';
+
+            const actions = showActions ? `
+    <td>
+      <button class="btn" onclick="event.stopPropagation();deleteCase('${c.id}')">Delete</button>
+    </td>` : '';
+
+            return `<tr onclick="openCase('${c.id}')">
+    <td>
+      <div class="case-name">${escHtml(c.caseName)}</div>
+      <div class="case-addr">${escHtml(c.propertyAddress || '—')}</div>
+    </td>
+    <td>${riskBadge(c.riskLevel)}</td>
+    <td>
+      <div class="score-bar-wrap">
+        <div class="score-bar"><div class="score-bar-fill" style="width:${fillW};background:${fillC}"></div></div>
+        <span class="score-num">${score}</span>
+      </div>
+    </td>
+    <td>${statusBadge(c.analysisStatus)}</td>
+    ${showActions ? `<td style="font-size:0.875rem;color:var(--text-tertiary)">${c.documents ? c.documents.length : 0}</td>` : ''}
+    <td style="font-size:0.875rem;color:var(--text-tertiary)">${fmtDate(c.createdAt)}</td>
+    ${actions}
+  </tr>`;
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  CREATE CASE
+        // ═══════════════════════════════════════════════════════
+        async function createCase() {
+            const name = document.getElementById('nc-name').value.trim();
+            const addr = document.getElementById('nc-addr').value.trim();
+            if (!name) { toast('Enter a case name', 'error'); return; }
+
+            try {
+                const c = await apiFetch('/cases', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caseName: name, propertyAddress: addr })
+                });
+                closeModal('new-case-modal');
+                toast('Case created', 'success');
+                allCases.unshift(c);
+                openCase(c.id);
+            } catch (e) {
+                toast('Failed to create case: ' + e.message, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DELETE CASE
+        // ═══════════════════════════════════════════════════════
+        async function deleteCase(id) {
+            if (!confirm('Delete this case?')) return;
+            try {
+                await apiFetch(`/cases/${id}`, { method: 'DELETE' });
+                allCases = allCases.filter(c => c.id !== id);
+                toast('Case deleted', 'success');
+                loadCases();
+                if (currentCaseId === id) showView('cases');
+            } catch (e) {
+                toast('Delete failed: ' + e.message, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  OPEN CASE DETAIL
+        // ═══════════════════════════════════════════════════════
+        async function openCase(id) {
+            currentCaseId = id;
+            stopPolling();
+            showView('detail');
+
+            // Reset tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'overview'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-overview'));
+
+            try {
+                const c = await apiFetch(`/cases/${id}/report`);
+                renderCaseDetail(c);
+            } catch (e) {
+                toast('Failed to load case', 'error');
+            }
+        }
+
+        function renderCaseDetail(c) {
+            currentCaseId = c.id;
+            document.getElementById('det-name').textContent = c.caseName;
+            document.getElementById('det-addr').textContent = c.propertyAddress || '—';
+            document.getElementById('det-id').textContent = c.id.slice(0, 8) + '…';
+            document.getElementById('det-created').textContent = fmtDate(c.createdAt);
+            document.getElementById('det-status-span').innerHTML = statusBadge(c.analysisStatus);
+            document.getElementById('topbar-title').textContent = c.caseName;
+
+            // Actions
+            const acts = document.getElementById('det-actions');
+            acts.innerHTML = '';
+            if (c.reportPath) {
+                const dl = document.createElement('button');
+                dl.className = 'btn btn-primary';
+                dl.textContent = '⬇ Download PDF';
+                dl.onclick = () => downloadReport(c.id);
+                acts.appendChild(dl);
+            }
+            const del = document.createElement('button');
+            del.className = 'btn btn-danger';
+            del.textContent = 'Delete';
+            del.onclick = () => deleteCase(c.id);
+            acts.appendChild(del);
+
+            // Section visibility
+            const uploSec = document.getElementById('upload-section');
+            const anaSec = document.getElementById('analyzing-section');
+            const resSec = document.getElementById('results-section');
+            const failSec = document.getElementById('failed-section');
+
+            uploSec.style.display = 'none';
+            anaSec.style.display = 'none';
+            resSec.style.display = 'none';
+            failSec.style.display = 'none';
+
+            const status = c.analysisStatus;
+
+            if (status === 'Pending' || !status) {
+                uploSec.style.display = 'block';
+                if (c.documents && c.documents.length) {
+                    document.getElementById('analyze-btn').disabled = false;
+                    document.querySelector('.upload-zone-text').textContent = `📄 ${c.documents[c.documents.length - 1].filename} — ready to analyse`;
+                }
+            } else if (status === 'Analyzing') {
+                anaSec.style.display = 'block';
+                startPolling(c.id);
+            } else if (status === 'Completed') {
+                resSec.style.display = 'block';
+                renderResults(c);
+            } else if (status === 'Failed') {
+                failSec.style.display = 'block';
+                document.getElementById('error-msg').textContent = c.error || 'Unknown error';
+                uploSec.style.display = 'block'; // allow retry
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  UPLOAD
+        // ═══════════════════════════════════════════════════════
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) setFile(file);
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            document.getElementById('upload-zone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) setFile(file);
+        }
+
+        function setFile(file) {
+            const allowed = ['.pdf', '.docx', '.doc'];
+            const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+            if (!allowed.includes(ext)) {
+                toast('Unsupported file type — use PDF or DOCX', 'error');
+                return;
+            }
+            pendingFile = file;
+            document.querySelector('.upload-zone-text').textContent = `📄 ${file.name}`;
+            document.getElementById('analyze-btn').disabled = false;
+        }
+
+        async function startAnalysis() {
+            if (!currentCaseId) return;
+            const lang = document.getElementById('lang-select').value;
+
+            // Upload file first if pending
+            if (pendingFile) {
+                try {
+                    toast('Uploading document…', 'info');
+                    const fd = new FormData();
+                    fd.append('file', pendingFile);
+                    const r = await fetch(`${API}/cases/${currentCaseId}/upload`, { method: 'POST', body: fd });
+                    if (!r.ok) throw new Error('Upload failed');
+                    pendingFile = null;
+                    toast('Document uploaded', 'success');
+                } catch (e) {
+                    toast('Upload failed: ' + e.message, 'error');
+                    return;
+                }
+            }
+
+            // Trigger analysis
+            try {
+                await apiFetch(`/cases/${currentCaseId}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: lang })
+                });
+                document.getElementById('upload-section').style.display = 'none';
+                document.getElementById('analyzing-section').style.display = 'block';
+                toast('Analysis started — polling for results…', 'info');
+                startPolling(currentCaseId);
+            } catch (e) {
+                toast('Failed to start analysis: ' + e.message, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  POLLING
+        // ═══════════════════════════════════════════════════════
+        function startPolling(id) {
+            stopPolling();
+            pollInterval = setInterval(async () => {
+                try {
+                    const s = await apiFetch(`/cases/${id}/status`);
+                    if (s.analysisStatus === 'Completed' || s.analysisStatus === 'Failed') {
+                        stopPolling();
+                        const c = await apiFetch(`/cases/${id}/report`);
+                        renderCaseDetail(c);
+                        if (s.analysisStatus === 'Completed') {
+                            toast('Analysis complete!', 'success');
+                            loadDashboard(); // refresh stats
+                        } else {
+                            toast('Analysis failed: ' + (s.error || 'unknown'), 'error');
+                        }
+                    }
+                } catch (e) { /* retry next tick */ }
+            }, 4000);
+        }
+
+        function stopPolling() {
+            if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DOWNLOAD
+        // ═══════════════════════════════════════════════════════
+        async function downloadReport(id) {
+            try {
+                const r = await fetch(`${API}/cases/${id}/download`);
+                if (!r.ok) throw new Error('Not available');
+                const blob = await r.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `legal_report_${id.slice(0, 8)}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                toast('Download failed: ' + e.message, 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  RENDER RESULTS
+        // ═══════════════════════════════════════════════════════
+        function renderResults(c) {
+            renderOverview(c);
+            renderLRI(c.lriData);
+            renderRisks(c.categoryScores, c.riskAnalysis);
+            renderThreats(c.lriData);
+            renderSummary(c.riskSummary);
+        }
+
+        // ── Overview ──────────────────────────────────────────
+        function renderOverview(c) {
+            const score = c.overallRiskScore || 0;
+            document.getElementById('ov-score').textContent = fmtScore(score);
+            document.getElementById('ov-score').style.color = scoreColor(score);
+            document.getElementById('ov-badge').innerHTML = riskBadge(c.riskLevel);
+
+            const lri = c.lriData;
+            document.getElementById('ov-description').textContent = lri ? lri.band_description : '';
+            document.getElementById('ov-doc').textContent = c.documents && c.documents.length
+                ? c.documents[c.documents.length - 1].filename : '—';
+            document.getElementById('ov-words').textContent = lri ? `${lri.word_count?.toLocaleString()} words` : '';
+            document.getElementById('ov-threats').textContent = lri ? `${lri.total_threats} threat indicators detected` : '';
+
+            // Key findings
+            const fb = document.getElementById('findings-body');
+            const kf = c.keyFindings;
+            if (kf && kf.length) {
+                fb.innerHTML = kf.map(item => {
+                    const col = riskColor(item.severity);
+                    return `<div class="finding-group">
+        <div class="finding-group-header">
+          <span class="finding-cat-name">${escHtml(item.category)}</span>
+          ${riskBadge(item.severity)}
+        </div>
+        <div class="finding-bullets">
+          ${item.findings.map(f => `<div class="finding-bullet">${escHtml(f)}</div>`).join('')}
+        </div>
+      </div>`;
+                }).join('');
+            } else {
+                fb.innerHTML = '<div style="font-size:0.875rem;color:var(--text-tertiary)">No key findings extracted.</div>';
+            }
+
+            // Category bars
+            const catBars = document.getElementById('ov-cat-bars');
+            if (c.categoryScores) {
+                catBars.innerHTML = Object.entries(c.categoryScores).map(([cat, cs]) => {
+                    const prob = cs.probability || (cs.score - 1) / 9;
+                    const pctW = `${Math.min(prob * 100, 100)}%`;
+                    const col = scoreColor(cs.score);
+                    return `<div class="cat-bar-row">
+        <span class="cat-bar-label" title="${escHtml(cat)}">${escHtml(cat)}</span>
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pctW};background:${col}"></div></div>
+        <span class="cat-bar-pct" style="color:${col}">${fmtScore(cs.score)}/10</span>
+        <span class="cat-bar-threats">${riskBadge(cs.severity)}</span>
+      </div>`;
+                }).join('');
+            }
+        }
+
+        // ── LRI Tab ───────────────────────────────────────────
+        function renderLRI(lri) {
+            if (!lri) {
+                document.getElementById('tab-lri').innerHTML = '<div class="empty"><div class="empty-text">LRI data not available</div></div>';
+                return;
+            }
+
+            const score = lri.lri_score;
+            const col = lriColor(score);
+
+            document.getElementById('lri-score-num').textContent = score.toFixed(1);
+            document.getElementById('lri-score-num').style.color = col;
+
+            setTimeout(() => {
+                document.getElementById('lri-fill').style.width = `${Math.min(score, 100)}%`;
+                document.getElementById('lri-fill').style.background = col;
+            }, 100);
+
+            document.getElementById('lri-band-desc').innerHTML =
+                `<span style="color:${col};font-weight:700">${lri.band?.toUpperCase()}</span> — ${lri.band_description}`;
+
+            // Category bars in LRI tab
+            const catBars = document.getElementById('lri-cat-bars');
+            if (lri.categories) {
+                catBars.innerHTML = Object.entries(lri.categories).map(([cat, cv]) => {
+                    const pctW = `${Math.min(cv.probability * 100, 100)}%`;
+                    const col2 = lriColor(cv.weighted_contribution * 100 / (cv.weight || 0.01));
+                    return `<div class="cat-bar-row">
+        <span class="cat-bar-label" title="${escHtml(cat)}">${escHtml(cat)}</span>
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pctW};background:${col2}"></div></div>
+        <span class="cat-bar-pct">${pct(cv.probability)}</span>
+        <span class="cat-bar-threats" style="color:var(--text-tertiary)">${cv.threat_count} threats</span>
+      </div>`;
+                }).join('');
+            }
+
+            // Sub-score table
+            const stbody = document.getElementById('lri-subscore-tbody');
+            if (lri.categories) {
+                stbody.innerHTML = Object.entries(lri.categories).map(([cat, cv]) => `
+      <tr>
+        <td style="color:var(--text-primary)">${escHtml(cat)}</td>
+        <td>${pct(cv.keyword_density)}</td>
+        <td>${pct(cv.rag_similarity_score)}</td>
+        <td>${pct(cv.threat_density_score)}</td>
+        <td>${pct(cv.gemini_severity_score)}</td>
+        <td><span style="color:${riskColor(cv.gemini_severity_label)}">${cv.gemini_severity_label}</span></td>
+        <td style="color:var(--gold);font-weight:700">${pct(cv.probability)}</td>
+        <td style="color:var(--text-secondary)">${(cv.weighted_contribution * 100).toFixed(2)}</td>
+      </tr>`).join('');
+            }
+        }
+
+        // ── Risk Analysis Accordion ───────────────────────────
+        function renderRisks(categoryScores, riskAnalysis) {
+            const acc = document.getElementById('risk-accordion');
+            if (!categoryScores && !riskAnalysis) {
+                acc.innerHTML = '<div class="empty"><div class="empty-text">No risk analysis data</div></div>';
+                return;
+            }
+
+            const categories = categoryScores ? Object.keys(categoryScores) :
+                riskAnalysis ? Object.keys(riskAnalysis) : [];
+
+            acc.innerHTML = categories.map((cat, i) => {
+                const cs = categoryScores?.[cat] || {};
+                const ra = riskAnalysis?.[cat] || {};
+                const sev = cs.severity || '—';
+                const scoreDisp = cs.score ? `${fmtScore(cs.score)}/10` : '';
+                const analysis = cs.analysis || ra.analysis || 'Analysis not available.';
+                const ragCount = cs.rag_ref_count ?? ra.rag_ref_count ?? 0;
+                const ts = cs.timestamp || ra.timestamp || '';
+
+                return `<div class="risk-item" id="risk-item-${i}">
+      <div class="risk-item-header" onclick="toggleRisk(${i})">
+        <span class="risk-item-title">${escHtml(cat)}</span>
+        <div class="risk-item-meta">
+          ${riskBadge(sev)}
+          <span class="risk-score-chip">${scoreDisp}</span>
+          <span class="risk-chevron">▼</span>
+        </div>
+      </div>
+      <div class="risk-item-body">
+        ${analysis.split('\n\n').map(p => p.trim() ? `<p>${escHtml(p)}</p>` : '').join('')}
+        ${ragCount > 0 ? `<div class="risk-rag-refs">
+          <div class="risk-rag-label">RAG Knowledge Base</div>
+          <div class="risk-rag-count">${ragCount} legal provision(s) referenced</div>
+        </div>` : ''}
+        ${ts ? `<div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:16px">Analysed: ${fmtDate(ts)}</div>` : ''}
+      </div>
+    </div>`;
+            }).join('');
+        }
+
+        function toggleRisk(i) {
+            document.getElementById('risk-item-' + i).classList.toggle('open');
+        }
+
+        // ── Threat Inventory ──────────────────────────────────
+        function renderThreats(lri) {
+            const body = document.getElementById('threat-body');
+            if (!lri || !lri.categories) {
+                body.innerHTML = '<div class="empty"><div class="empty-text">No threat data available</div></div>';
+                return;
+            }
+
+            body.innerHTML = Object.entries(lri.categories).map(([cat, cv]) => {
+                const threats = cv.threats || [];
+                return `<div class="threat-cat">
+      <div class="threat-cat-header">
+        <span class="threat-cat-name">${escHtml(cat)}</span>
+        <span class="threat-count-chip">${threats.length} threat(s)</span>
+      </div>
+      ${threats.length === 0
+                        ? `<div style="font-size:0.875rem;color:var(--text-tertiary);padding:12px 0">No threat indicators detected.</div>`
+                        : `<div class="threat-table-wrap">
+          <table class="threat-table">
+            <thead><tr>
+              <th>ID</th><th>Pattern</th><th>Page</th><th>Lines</th><th>Matched Text</th><th>Context</th>
+            </tr></thead>
+            <tbody>
+              ${threats.map(t => `<tr>
+                <td class="threat-id">${t.threat_id}</td>
+                <td class="threat-match">${escHtml(t.pattern_matched)}</td>
+                <td class="threat-location">p.${t.page_number}</td>
+                <td class="threat-location">${t.line_start}–${t.line_end}</td>
+                <td style="font-size:0.875rem;color:var(--gold);font-weight:600">"${escHtml(t.matched_text.slice(0, 60))}${t.matched_text.length > 60 ? '…' : ''}"</td>
+                <td class="threat-context" title="${escHtml(t.context_snippet)}">${escHtml(t.context_snippet.slice(0, 80))}…</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`
+                    }
+    </div>`;
+            }).join('');
+        }
+
+        // ── Summary ───────────────────────────────────────────
+        function renderSummary(summary) {
+            const el = document.getElementById('summary-text');
+            if (!summary) {
+                el.innerHTML = '<p style="color:var(--text-tertiary)">No summary available.</p>';
+                return;
+            }
+            el.innerHTML = summary.split('\n\n')
+                .filter(p => p.trim())
+                .map(p => `<p>${escHtml(p.trim())}</p>`)
+                .join('');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  REFRESH ALL
+        // ═══════════════════════════════════════════════════════
+        function refreshAll() {
+            loadDashboard();
+            if (document.getElementById('view-cases').classList.contains('active')) loadCases();
+            if (currentCaseId && document.getElementById('view-detail').classList.contains('active')) openCase(currentCaseId);
+            toast('Refreshed', 'info');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  INIT
+        // ═══════════════════════════════════════════════════════
+        loadDashboard();
+    </script>
+</body>
+
+</html>
